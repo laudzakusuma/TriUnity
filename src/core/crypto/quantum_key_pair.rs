@@ -1,37 +1,61 @@
-use super::signatures::QuantumSignature;
-use sha3::{Digest, Sha3_256};
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
-pub struct QuantumKeyPair {
-    pub public_key: Vec<u8>,
-    private_key: Vec<u8>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AlternativeQuantumKeyPair {
+    private_key: [u8; 32],
+    public_key: [u8; 32],
 }
 
-impl QuantumKeyPair {
-    pub fn new() -> Self {
-        let mut rng = rand::thread_rng();
-        // FIXED: Mengganti .gen() yang usang dengan .random()
-        let private_key: [u8; 32] = rng.gen();
-        let public_key: [u8; 32] = rng.gen();
+impl AlternativeQuantumKeyPair {
+    pub fn generate() -> Self {
+        let mut rng = rand::rng();
+        
+        let private_key: [u8; 32] = rng.random();
+        let public_key: [u8; 32] = rng.random();
+        
         Self {
-            public_key: public_key.to_vec(),
-            private_key: private_key.to_vec(),
+            private_key,
+            public_key,
         }
     }
 
-    pub fn address_hex(&self) -> String {
-        let mut hasher = Sha3_256::new();
-        hasher.update(&self.public_key);
-        let hash = hasher.finalize();
-        let address_bytes = &hash[hash.len() - 20..];
-        hex::encode(address_bytes)
+    pub fn public_key(&self) -> &[u8; 32] {
+        &self.public_key
     }
 
-    pub fn sign(&self, message: &[u8]) -> Result<QuantumSignature, &'static str> {
-        println!("Signing message with private key (length: {} bytes)", self.private_key.len());
-        Ok(QuantumSignature {
-            signature_data: format!("signed_{}", String::from_utf8_lossy(message)).into_bytes(),
-            public_key: self.public_key.clone(),
-        })
+    pub fn private_key(&self) -> &[u8; 32] {
+        &self.private_key
+    }
+
+    pub fn address_hex(&self) -> String {
+        hex::encode(&self.public_key[..20])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_alternative_keypair_generation() {
+        let keypair = AlternativeQuantumKeyPair::generate();
+        
+        assert_ne!(keypair.private_key, [0; 32]);
+        assert_ne!(keypair.public_key, [0; 32]);
+        
+        println!("🔑 Alternative quantum keypair generated!");
+        println!("   Address: 0x{}", keypair.address_hex());
+    }
+
+    #[test]
+    fn test_different_keypairs() {
+        let keypair1 = AlternativeQuantumKeyPair::generate();
+        let keypair2 = AlternativeQuantumKeyPair::generate();
+        
+        assert_ne!(keypair1.private_key, keypair2.private_key);
+        assert_ne!(keypair1.public_key, keypair2.public_key);
+        
+        println!("🎲 Different keypairs generated successfully!");
     }
 }
