@@ -54,9 +54,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Test signing
     let message = b"TriUnity Protocol - The future of blockchain!";
-    let signature = keypair.sign(&message).unwrap();
+    let signature = keypair.sign(message).unwrap();
     info!("✍️  Signed test message");
-    info!("   Signature size: {} bytes", signature.size());
+    info!("  Signature size: {} bytes", signature.size());
 
     // Verify signature
     if signature.verify(message, &keypair.public_key) {

@@ -73,7 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let signature = keypair.sign(message.as_bytes())?;
 
             println!("✅ Message signed successfully!");
-            println!("   Signature size: {} bytes", signature.size());
+            println!("  Signature size: {} bytes", signature.size());
             println!("   Quantum-safe: ✅");
         }
 
