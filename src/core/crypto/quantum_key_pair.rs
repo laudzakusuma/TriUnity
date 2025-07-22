@@ -1,18 +1,14 @@
-//! 🔐 Simple Quantum Key Pair using getrandom
-//! 
-//! No deprecated warnings, pure and simple!
-
 use getrandom::getrandom;
 use serde::{Deserialize, Serialize};
 
-/// 🔑 Simple quantum key pair using getrandom
+/// 🔑 Main quantum key pair (renamed untuk compatibility)
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SimpleQuantumKeyPair {
+pub struct QuantumKeyPair {  // Changed from SimpleQuantumKeyPair to QuantumKeyPair
     private_key: [u8; 32],
     public_key: [u8; 32],
 }
 
-impl SimpleQuantumKeyPair {
+impl QuantumKeyPair {
     /// 🎲 Generate using getrandom (cryptographically secure, no warnings!)
     pub fn generate() -> Self {
         let mut private_key = [0u8; 32];
@@ -54,6 +50,24 @@ impl SimpleQuantumKeyPair {
         address.copy_from_slice(&self.public_key[..20]);
         address
     }
+
+    /// ✍️ Simple signature (placeholder for compatibility)
+    pub fn sign(&self, _message: &[u8]) -> Vec<u8> {
+        // This is a placeholder - in production you'd use proper quantum signatures
+        // For now, return a simple hash of private key + message
+        use sha3::{Digest, Sha3_256};
+        let mut hasher = Sha3_256::new();
+        hasher.update(&self.private_key);
+        hasher.update(_message);
+        hasher.finalize().to_vec()
+    }
+
+    /// ✅ Simple verify (placeholder for compatibility)
+    pub fn verify(&self, message: &[u8], signature: &[u8]) -> bool {
+        // Simple verification - check if signature matches what we would generate
+        let expected = self.sign(message);
+        expected == signature
+    }
 }
 
 #[cfg(test)]
@@ -61,22 +75,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_keypair_generation() {
-        let keypair = SimpleQuantumKeyPair::generate();
+    fn test_quantum_keypair_generation() {
+        let keypair = QuantumKeyPair::generate();
         
         // Keys should not be all zeros
         assert_ne!(keypair.private_key, [0; 32]);
         assert_ne!(keypair.public_key, [0; 32]);
         
-        println!("🔑 Simple quantum keypair generated!");
+        println!("🔑 Quantum keypair generated!");
         println!("   Address: 0x{}", keypair.address_hex());
         println!("   Full address: 0x{}", hex::encode(keypair.full_address()));
     }
 
     #[test]
     fn test_randomness() {
-        let keypair1 = SimpleQuantumKeyPair::generate();
-        let keypair2 = SimpleQuantumKeyPair::generate();
+        let keypair1 = QuantumKeyPair::generate();
+        let keypair2 = QuantumKeyPair::generate();
         
         // Should be different (cryptographically secure random)
         assert_ne!(keypair1.private_key, keypair2.private_key);
@@ -90,7 +104,7 @@ mod tests {
 
     #[test]
     fn test_address_formats() {
-        let keypair = SimpleQuantumKeyPair::generate();
+        let keypair = QuantumKeyPair::generate();
         
         let hex_address = keypair.address_hex();
         let byte_address = keypair.address();
@@ -109,12 +123,28 @@ mod tests {
     }
 
     #[test]
+    fn test_simple_signatures() {
+        let keypair = QuantumKeyPair::generate();
+        let message = b"Hello TriUnity!";
+        
+        let signature = keypair.sign(message);
+        assert!(keypair.verify(message, &signature));
+        
+        // Wrong message should fail
+        let wrong_message = b"Wrong message";
+        assert!(!keypair.verify(wrong_message, &signature));
+        
+        println!("✍️ Simple signatures working!");
+        println!("   Signature length: {} bytes", signature.len());
+    }
+
+    #[test]
     fn test_serialization() {
-        let keypair = SimpleQuantumKeyPair::generate();
+        let keypair = QuantumKeyPair::generate();
         
         // Serialize and deserialize
         let serialized = bincode::serialize(&keypair).unwrap();
-        let deserialized: SimpleQuantumKeyPair = bincode::deserialize(&serialized).unwrap();
+        let deserialized: QuantumKeyPair = bincode::deserialize(&serialized).unwrap();
         
         // Should be identical
         assert_eq!(keypair.private_key, deserialized.private_key);
