@@ -77,6 +77,9 @@ impl StateManager {
 
     /// 📄 Deploy contract
     pub fn deploy_contract(&mut self, address: &[u8], code: Vec<u8>, owner: Vec<u8>) {
+        // Calculate code hash first
+        let code_hash = self.hash_code(&code);
+        
         let contract = Contract {
             code: code.clone(),
             storage: HashMap::new(),
@@ -87,7 +90,7 @@ impl StateManager {
 
         // Mark account as contract
         let account = self.get_or_create_account(address);
-        account.code_hash = Some(self.hash_code(&code));
+        account.code_hash = Some(code_hash);
     }
 
     /// 📄 Get contract

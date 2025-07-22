@@ -12,12 +12,12 @@ keywords = ["blockchain", "quantum-safe", "ai", "consensus"]
 # Quantum-safe cryptography (POST-QUANTUM READY! 🔐)
 pqcrypto-dilithium = "0.5"
 pqcrypto-kyber = "0.7"
+pqcrypto-traits = "0.3"  # Added this for trait implementations
 sha3 = "0.10"
 hex = "0.4"
 
 # Async networking (BLAZING FAST! ⚡)
 tokio = { version = "1.0", features = ["full"] }
-# Removed libp2p for now - we'll implement simple networking
 
 # Serialization (EFFICIENT! 📦)
 serde = { version = "1.0", features = ["derive"] }
@@ -29,8 +29,7 @@ async-trait = "0.1"
 futures = "0.3"
 
 # Simple database (NO C COMPILATION! 🎉)
-sled = "0.34"  # Pure Rust database
-# Removed rocksdb which requires C compilation
+sled = "0.34"
 
 # Logging & monitoring (OBSERVABLE! 📊)
 tracing = "0.1"

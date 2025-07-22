@@ -3,7 +3,7 @@
 //! Command-line interface for interacting with TriUnity Protocol
 
 use clap::{Parser, Subcommand};
-use triunity::core::crypto::QuantumKeyPair;
+use triunity::core::crypto::quantum_key_pair::QuantumKeyPair;
 
 #[derive(Parser)]
 #[command(name = "triunity-cli")]
@@ -50,12 +50,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::GenerateKey { output } => {
             println!("🔑 Generating quantum-safe keypair...");
 
-            let keypair = QuantumKeyPair::generate();
+            let keypair = QuantumKeyPair::new();
             let address = keypair.address_hex();
 
             println!("✅ Keypair generated successfully!");
             println!("   Address: 0x{}", address);
-            println!("   Public key size: {} bytes", keypair.public_key().len());
+            println!("  Public key size: {} bytes", keypair.public_key.len());
 
             if let Some(file) = output {
                 println!("💾 Saving to file: {}", file);
@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("   Message: {}", message);
 
             // For demo, generate new keypair
-            let keypair = QuantumKeyPair::generate();
+            let keypair = QuantumKeyPair::new();
             let signature = keypair.sign(message.as_bytes())?;
 
             println!("✅ Message signed successfully!");

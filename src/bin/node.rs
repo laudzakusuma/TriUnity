@@ -47,19 +47,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("🔧 Initializing quantum-safe blockchain...");
 
     // Generate test keypair to verify crypto works
-    use triunity::core::crypto::QuantumKeyPair;
-    let keypair = QuantumKeyPair::generate();
+    use triunity::core::crypto::quantum_key_pair::QuantumKeyPair;
+    let keypair = QuantumKeyPair::new();
     info!("🔑 Generated quantum-safe keypair");
-    info!("   Address: 0x{}", keypair.address_hex());
+    info!("  Address: 0x{}", keypair.address_hex());
 
     // Test signing
     let message = b"TriUnity Protocol - The future of blockchain!";
-    let signature = keypair.sign(message)?;
+    let signature = keypair.sign(&message).unwrap();
     info!("✍️  Signed test message");
     info!("   Signature size: {} bytes", signature.size());
 
     // Verify signature
-    if signature.verify(message, keypair.public_key()) {
+    if signature.verify(message, &keypair.public_key) {
         info!("✅ Quantum signature verification successful!");
     } else {
         error!("❌ Quantum signature verification failed!");

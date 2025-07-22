@@ -1,17 +1,7 @@
-//! 💾 Blockchain storage and state management
-//! 
-//! High-performance storage layer featuring:
-//! - Quantum-safe block structures
-//! - Efficient state management
-//! - Fast merkle tree operations
-//! - Simple database backend
-
+// 1. Declare the 'blocks.rs' file as a public module.
 pub mod blocks;
-pub mod merkle;
-pub mod state;
+// You likely also want to declare your other files in this directory.
 pub mod database;
 
+// 2. Re-export all public items from the 'blocks' module.
 pub use blocks::*;
-pub use merkle::*;
-pub use state::*;
-pub use database::*;

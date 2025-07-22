@@ -1,14 +1,7 @@
-//! 🔐 Quantum-safe cryptographic primitives
-//! 
-//! Post-quantum cryptography implementation using:
-//! - CRYSTALS-Dilithium for digital signatures
-//! - CRYSTALS-Kyber for key encapsulation
-//! - SHA3 for quantum-resistant hashing
-
+pub mod quantum_key_pair;
+pub use quantum_key_pair::QuantumKeyPair;
+// 1. Declare the 'signatures.rs' file as a public module.
 pub mod signatures;
-pub mod hash;
-pub mod encryption;
 
+// 2. Re-export all public items from the 'signatures' module.
 pub use signatures::*;
-pub use hash::*;
-pub use encryption::*;

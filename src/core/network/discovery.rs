@@ -11,7 +11,7 @@ use std::collections::HashMap;
 pub struct NodeDiscovery {
     bootstrap_nodes: Vec<SocketAddr>,
     discovered_nodes: HashMap<Vec<u8>, DiscoveredNode>,
-    discovery_interval: u64, // seconds
+    _discovery_interval: u64, // seconds
 }
 
 /// 📍 Discovered node information
@@ -39,7 +39,7 @@ impl NodeDiscovery {
         Self {
             bootstrap_nodes,
             discovered_nodes: HashMap::new(),
-            discovery_interval: 300, // 5 minutes
+            _discovery_interval: 300, // 5 minutes
         }
     }
 

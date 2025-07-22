@@ -1,6 +1,6 @@
 //! 🌐 Network Protocol Definitions
 //! 
-//! Simple networking for development (no libp2p dependency)
+//! Simple networking for development
 
 use serde::{Deserialize, Serialize};
 use crate::core::crypto::QuantumSignature;
@@ -106,10 +106,10 @@ impl NetworkProtocol {
         }
     }
 
-    /// 📡 Handle incoming network message (simplified)
+    /// 📡 Handle incoming network message (THIS IS NOW IN IMPL BLOCK!)
     pub fn handle_message(&mut self, message: NetworkMessage, from: SocketAddr) -> Result<Option<NetworkMessage>, String> {
         match message {
-            NetworkMessage::Handshake { version, node_id, capabilities, .. } => {
+            NetworkMessage::Handshake { node_id, .. } => {
                 println!("👋 Received handshake from node: {}", hex::encode(&node_id[..8]));
                 self.connected_peers.push(from);
                 
@@ -167,8 +167,8 @@ impl Default for NodeCapabilities {
     }
 }
 
-/// 🕐 Get current timestamp
-fn current_timestamp() -> u64 {
+/// 🕐 Get current timestamp (PUBLIC FUNCTION!)
+pub fn current_timestamp() -> u64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
