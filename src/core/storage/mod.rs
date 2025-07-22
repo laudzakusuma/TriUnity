@@ -1,16 +1,12 @@
 //! 💾 Blockchain storage and state management
-//! 
-//! High-performance storage layer featuring:
-//! - Quantum-safe block structures
-//! - Efficient state management
-//! - Fast merkle tree operations
 
 pub mod blocks;
 pub mod merkle;
 pub mod state;
 pub mod database;
 
-pub use blocks::*;
+// Export specific types to avoid conflicts
+pub use blocks::{Block, Transaction, ConsensusData, BlockHeader};
 pub use merkle::*;
 pub use state::*;
 pub use database::*;
