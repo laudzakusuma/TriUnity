@@ -2,7 +2,6 @@ use clap::{Arg, Command};
 use std::process;
 use triunity::core::crypto::QuantumKeyPair;
 use triunity::core::consensus::ConsensusRouter;
-use triunity::core::storage::{Block, ConsensusData};
 use triunity::VERSION;
 
 #[derive(Debug, Clone)]
