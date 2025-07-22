@@ -85,7 +85,7 @@ async fn run_node(port: u16, is_validator: bool, debug: bool) {
         quantum_safe: true,
     };
 
-    let mut consensus_router = ConsensusRouter::new();
+    let consensus_router = ConsensusRouter::new(); // Removed mut
     let network_protocol = NetworkProtocol::new(node_id, capabilities);
     let mut state_manager = StateManager::new();
 
