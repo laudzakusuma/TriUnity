@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sha3::{Digest, Sha3_256};
-// If you still have `unresolved import` errors, ensure your mod.rs files are set up correctly.
 use crate::core::crypto::QuantumSignature;
+use sha3::{Digest, Sha3_256};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct BlockHeader {
@@ -17,6 +16,17 @@ pub struct Block {
     pub header: BlockHeader,
     pub transactions: Vec<String>, // Or a proper Transaction type
     pub hash: String,
+    pub signature: QuantumSignature,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Transaction {
+    pub from: Vec<u8>,      // Sender public key
+    pub to: Vec<u8>,        // Recipient public key
+    pub amount: u64,        // Amount in smallest unit
+    pub fee: u64,           // Transaction fee
+    pub nonce: u64,         // Sender nonce
+    pub data: Vec<u8>,      // Smart contract data
     pub signature: QuantumSignature,
 }
 
