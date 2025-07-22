@@ -17,7 +17,7 @@ hex = "0.4"
 
 # Async networking (BLAZING FAST! ⚡)
 tokio = { version = "1.0", features = ["full"] }
-libp2p = "0.53"
+# Removed libp2p for now - we'll implement simple networking
 
 # Serialization (EFFICIENT! 📦)
 serde = { version = "1.0", features = ["derive"] }
@@ -28,8 +28,9 @@ bincode = "1.3"
 async-trait = "0.1"
 futures = "0.3"
 
-# Database (ROCK SOLID! 🗄️)
-rocksdb = "0.21"
+# Simple database (NO C COMPILATION! 🎉)
+sled = "0.34"  # Pure Rust database
+# Removed rocksdb which requires C compilation
 
 # Logging & monitoring (OBSERVABLE! 📊)
 tracing = "0.1"
