@@ -1,9 +1,10 @@
+pub const DASHBOARD_HTML: &str = r#"
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TriUnity</title>
+    <title>TriUnity Control Center</title>
     <style>
         * {
             margin: 0;
@@ -1183,5 +1184,315 @@
         // Start everything
         init();
     </script>
+    <script>
+        // Enhanced JavaScript with WebSocket integration
+        class TriUnityDashboard {
+            constructor() {
+                this.metricsWs = null;
+                this.activityWs = null;
+                this.isConnected = false;
+                this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+                
+                this.init();
+            }
+
+            async init() {
+                this.initTheme();
+                this.initChart();
+                this.connectWebSockets();
+                
+                // Initial data load
+                await this.loadInitialData();
+                
+                // Setup event listeners
+                this.setupEventListeners();
+                
+                console.log('🚀 TriUnity Dashboard initialized');
+            }
+
+            initTheme() {
+                if (this.isDarkMode) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            }
+
+            connectWebSockets() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const host = window.location.host;
+
+                // Connect to metrics WebSocket
+                this.metricsWs = new WebSocket(`${protocol}//${host}/ws/metrics`);
+                
+                this.metricsWs.onopen = () => {
+                    console.log('📊 Metrics WebSocket connected');
+                    this.isConnected = true;
+                    this.updateConnectionStatus(true);
+                };
+
+                this.metricsWs.onmessage = (event) => {
+                    const metrics = JSON.parse(event.data);
+                    this.updateMetricsDisplay(metrics);
+                };
+
+                this.metricsWs.onclose = () => {
+                    console.log('📊 Metrics WebSocket disconnected');
+                    this.isConnected = false;
+                    this.updateConnectionStatus(false);
+                    
+                    // Reconnect after 3 seconds
+                    setTimeout(() => this.connectWebSockets(), 3000);
+                };
+
+                // Connect to activity WebSocket
+                this.activityWs = new WebSocket(`${protocol}//${host}/ws/activities`);
+                
+                this.activityWs.onmessage = (event) => {
+                    const activity = JSON.parse(event.data);
+                    this.addActivity(activity);
+                };
+            }
+
+            async loadInitialData() {
+                try {
+                    const response = await fetch('/api/metrics');
+                    const metrics = await response.json();
+                    this.updateMetricsDisplay(metrics);
+                } catch (error) {
+                    console.error('Failed to load initial data:', error);
+                }
+            }
+
+            updateMetricsDisplay(metrics) {
+                // Update TPS
+                document.getElementById('tps').textContent = metrics.tps.toLocaleString();
+                
+                // Update block time
+                document.getElementById('block-time').textContent = metrics.block_time_ms;
+                
+                // Update health
+                document.getElementById('health').textContent = metrics.health_percentage.toFixed(1);
+                
+                // Update validators
+                document.getElementById('validators').textContent = metrics.validator_count.toLocaleString();
+                
+                // Update AI metrics
+                document.getElementById('confidence').textContent = Math.round(metrics.ai_confidence) + '%';
+                document.getElementById('confidence-bar').style.width = metrics.ai_confidence + '%';
+                document.getElementById('ai-mode').textContent = metrics.ai_mode;
+                document.getElementById('decisions').textContent = metrics.ai_decisions_per_min.toLocaleString();
+                document.getElementById('accuracy').textContent = metrics.ai_accuracy.toFixed(1) + '%';
+            }
+
+            updateConnectionStatus(connected) {
+                const statusDot = document.querySelector('.status-dot');
+                const statusText = document.querySelector('.status-pill');
+                
+                if (connected) {
+                    statusDot.style.background = 'var(--accent-green)';
+                    statusText.textContent = '🟢 LIVE';
+                } else {
+                    statusDot.style.background = 'var(--accent-red)';
+                    statusText.textContent = '🔴 DISCONNECTED';
+                }
+            }
+
+            addActivity(activity) {
+                const feed = document.getElementById('activity-feed');
+                const activityElement = document.createElement('div');
+                activityElement.className = 'activity-item';
+                activityElement.innerHTML = `
+                    <div class="activity-icon ${activity.event_type}">
+                        ${this.getIcon(activity.event_type)}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">${activity.message}</div>
+                        <div class="activity-time">${new Date(activity.timestamp * 1000).toLocaleTimeString()}</div>
+                    </div>
+                `;
+                
+                feed.insertBefore(activityElement, feed.firstChild);
+                
+                // Remove old activities (keep only 15)
+                while (feed.children.length > 15) {
+                    feed.removeChild(feed.lastChild);
+                }
+
+                // Show notification for important events
+                if (activity.event_type === 'success' || activity.event_type === 'warning') {
+                    this.showNotification(activity.message, activity.event_type);
+                }
+            }
+
+            getIcon(type) {
+                return { 
+                    success: '✓', 
+                    info: '•', 
+                    warning: '⚠',
+                    error: '✕'
+                }[type] || '•';
+            }
+
+            showNotification(message, type = 'info') {
+                // Notification implementation
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border-primary);
+                    border-radius: 12px;
+                    padding: 16px 20px;
+                    box-shadow: 0 10px 40px var(--card-shadow);
+                    z-index: 10000;
+                    transform: translateX(400px);
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    max-width: 300px;
+                    font-size: 0.875rem;
+                    color: var(--text-primary);
+                `;
+                
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>${this.getIcon(type)}</span>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(400px)';
+                    setTimeout(() => notification.remove(), 400);
+                }, 3000);
+            }
+
+            toggleTheme() {
+                // Theme toggle implementation with ripple effect
+                this.isDarkMode = !this.isDarkMode;
+                
+                if (this.isDarkMode) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+                
+                localStorage.setItem('darkMode', this.isDarkMode);
+                this.initChart(); // Redraw chart with new colors
+            }
+
+            async exportData() {
+                try {
+                    this.showNotification('Preparing data export...', 'info');
+                    
+                    const response = await fetch('/api/export');
+                    const data = await response.json();
+                    
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `TriUnity_Export_${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    this.showNotification('Data exported successfully!', 'success');
+                } catch (error) {
+                    this.showNotification('Export failed: ' + error.message, 'error');
+                }
+            }
+
+            async runLoadTest() {
+                try {
+                    this.showNotification('Starting load test...', 'info');
+                    
+                    const response = await fetch('/api/test/start', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (result.status === 'Load test started') {
+                        this.showNotification('Load test running for 10 seconds...', 'success');
+                    }
+                } catch (error) {
+                    this.showNotification('Load test failed: ' + error.message, 'error');
+                }
+            }
+
+            initChart() {
+                const canvas = document.getElementById('chart');
+                const ctx = canvas.getContext('2d');
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                ctx.strokeStyle = isDark ? '#0a84ff' : '#007aff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                const points = 50;
+                for (let i = 0; i <= points; i++) {
+                    const x = (canvas.width / points) * i;
+                    const baseY = canvas.height * 0.6;
+                    const noise = Math.sin(i * 0.3) * 30 + Math.random() * 20;
+                    const y = baseY + noise;
+                    
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            setupEventListeners() {
+                // Theme toggle
+                document.querySelector('.theme-toggle').addEventListener('click', () => this.toggleTheme());
+                
+                // Export button
+                document.querySelector('.btn.secondary[onclick="exportData()"]').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.exportData();
+                });
+                
+                // Load test button
+                document.querySelector('.btn:not(.secondary)').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.runLoadTest();
+                });
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.dashboard = new TriUnityDashboard();
+        });
+
+        // Legacy function support for HTML onclick handlers
+        function toggleTheme() {
+            if (window.dashboard) window.dashboard.toggleTheme();
+        }
+
+        function exportData() {
+            if (window.dashboard) window.dashboard.exportData();
+        }
+
+        function runTest() {
+            if (window.dashboard) window.dashboard.runLoadTest();
+        }
+
+        function showSettings() {
+            alert('⚙️ Settings\n\nSettings panel will be implemented in next version');
+        }
+
+        function setTimeframe(period) {
+            document.querySelectorAll('.chart-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (window.dashboard) window.dashboard.initChart();
+        }
+
+        function filterActivity(filter) {
+            console.log('Filter applied:', filter);
+        }
+    </script>
 </body>
 </html>
+"#;

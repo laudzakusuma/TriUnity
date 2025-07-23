@@ -13,7 +13,11 @@
 //! - `vm`: TriUnity Virtual Machine for smart contracts
 //! - `api`: JSON-RPC and WebSocket APIs
 //! - `cli`: Command-line interface and tools
-
+pub mod consensus;
+pub mod storage;
+pub mod blockchain;
+pub mod crypto;
+pub mod web; 
 pub mod core;
 pub mod vm;
 pub mod api;
