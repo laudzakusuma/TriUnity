@@ -273,7 +273,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         }
 
         .theme-toggle::after {
-            content: '☀️';
+            content: '☀';
             position: absolute;
             top: 50%;
             right: 8px;
@@ -284,7 +284,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         }
 
         [data-theme="dark"] .theme-toggle::after {
-            content: '🌙';
+            content: '☽';
             left: 8px;
             right: auto;
         }
@@ -416,9 +416,11 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         }
 
         .metric-icon {
-            font-size: 3rem;
+            font-size: 2rem;
             margin-bottom: 16px;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            opacity: 0.8;
+            font-weight: 300;
         }
 
         .metric-value {
@@ -618,7 +620,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         <!-- Header -->
         <div class="header">
             <div class="header-top">
-                <div class="logo">🚀 TriUnity</div>
+                <div class="logo">TriUnity</div>
                 <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode"></div>
             </div>
             
@@ -630,34 +632,34 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             </div>
 
             <div class="controls">
-                <button class="btn" onclick="exportData()">📤 Export</button>
-                <button class="btn" onclick="showSettings()">⚙️ Settings</button>
-                <button class="btn primary" onclick="runLoadTest()">🚀 Run Test</button>
+                <button class="btn" onclick="exportData()">Export</button>
+                <button class="btn" onclick="showSettings()">Settings</button>
+                <button class="btn primary" onclick="runLoadTest()">Run Test</button>
             </div>
         </div>
 
         <!-- Metrics Grid -->
         <div class="metrics-grid" id="metrics">
             <div class="metric-card">
-                <div class="metric-icon">⚡</div>
+                <div class="metric-icon">⬢</div>
                 <div class="metric-value" id="tps">Loading...</div>
                 <div class="metric-label">Transactions Per Second</div>
             </div>
             
             <div class="metric-card">
-                <div class="metric-icon">⏱️</div>
+                <div class="metric-icon">⧗</div>
                 <div class="metric-value" id="block-time">Loading...</div>
                 <div class="metric-label">Block Time (ms)</div>
             </div>
             
             <div class="metric-card">
-                <div class="metric-icon">🛡️</div>
+                <div class="metric-icon">◯</div>
                 <div class="metric-value" id="health">Loading...</div>
                 <div class="metric-label">Network Health (%)</div>
             </div>
             
             <div class="metric-card">
-                <div class="metric-icon">🌐</div>
+                <div class="metric-icon">⬡</div>
                 <div class="metric-value" id="validators">Loading...</div>
                 <div class="metric-label">Active Validators</div>
             </div>
@@ -666,7 +668,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         <!-- Achievement Section -->
         <div class="achievement-section">
             <div class="achievement-content">
-                <div class="achievement-title">🏆 IMPOSSIBLE ACHIEVED</div>
+                <div class="achievement-title">IMPOSSIBLE ACHIEVED</div>
                 <div class="achievement-subtitle">
                     TriUnity is the first blockchain to simultaneously achieve 
                     scalability, security, and decentralization - defeating the 
@@ -694,7 +696,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 this.initTheme();
                 this.updateMetrics();
                 this.startMetricsUpdater();
-                console.log('🚀 TriUnity Dashboard initialized');
+                console.log('TriUnity Dashboard initialized');
             }
 
             initTheme() {
@@ -770,7 +772,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                     }, 500);
                     
                 } catch (error) {
-                    console.error('❌ Failed to update metrics:', error);
+                    console.error('Failed to update metrics:', error);
                     this.showNotification('Failed to update metrics', 'error');
                 }
             }
@@ -808,12 +810,15 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             }
 
             startMetricsUpdater() {
-                // Update every 3 seconds
-                setInterval(() => {
+                // Get saved frequency or default to 3000ms
+                const savedFrequency = localStorage.getItem('updateFrequency') || '3000';
+                
+                // Update every X seconds based on settings
+                this.metricsInterval = setInterval(() => {
                     if (!this.isTestRunning) {
                         this.updateMetrics();
                     }
-                }, 3000);
+                }, parseInt(savedFrequency));
             }
 
             showNotification(message, type = 'success') {
@@ -821,7 +826,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 notification.className = 'success-feedback';
                 notification.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span>${type === 'success' ? '✅' : '❌'}</span>
+                        <span>${type === 'success' ? '✓' : '✗'}</span>
                         <span>${message}</span>
                     </div>
                 `;
@@ -876,6 +881,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             showSettings() {
                 // Create settings modal
                 const modal = document.createElement('div');
+                modal.className = 'settings-modal';
                 modal.style.cssText = `
                     position: fixed;
                     top: 0;
@@ -892,7 +898,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 `;
                 
                 modal.innerHTML = `
-                    <div style="
+                    <div class="settings-content" style="
                         background: var(--bg-card);
                         backdrop-filter: blur(20px);
                         border: 1px solid var(--border-color);
@@ -903,10 +909,10 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                         box-shadow: 0 20px 60px var(--shadow);
                         animation: slideUp 0.3s ease;
                     ">
-                        <h3 style="color: var(--text-primary); margin-bottom: 20px; font-size: 1.5rem;">⚙️ Settings</h3>
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px; font-size: 1.5rem;">Settings</h3>
                         <div style="margin-bottom: 20px;">
                             <label style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 8px;">Update Frequency</label>
-                            <select style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                            <select id="update-frequency" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
                                 <option value="2000">Real-time (2s)</option>
                                 <option value="3000" selected>Normal (3s)</option>
                                 <option value="5000">Slow (5s)</option>
@@ -914,17 +920,37 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                         </div>
                         <div style="margin-bottom: 20px;">
                             <label style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" checked> Enable notifications
+                                <input type="checkbox" id="enable-notifications" checked> Enable notifications
                             </label>
                         </div>
                         <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                            <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" style="background: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
-                            <button onclick="dashboard.saveSettings(); this.closest('[style*=\"position: fixed\"]').remove()" style="background: linear-gradient(45deg, #007aff, #00d4ff); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Save</button>
+                            <button class="modal-btn cancel-btn" style="background: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                            <button class="modal-btn save-btn" style="background: linear-gradient(45deg, #007aff, #00d4ff); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Save</button>
                         </div>
                     </div>
                 `;
                 
                 document.body.appendChild(modal);
+                
+                // Load saved settings
+                const savedFrequency = localStorage.getItem('updateFrequency') || '3000';
+                const savedNotifications = localStorage.getItem('notificationsEnabled') !== 'false';
+                
+                document.getElementById('update-frequency').value = savedFrequency;
+                document.getElementById('enable-notifications').checked = savedNotifications;
+                
+                // Add event listeners for buttons
+                const cancelBtn = modal.querySelector('.cancel-btn');
+                const saveBtn = modal.querySelector('.save-btn');
+                
+                cancelBtn.addEventListener('click', () => {
+                    modal.remove();
+                });
+                
+                saveBtn.addEventListener('click', () => {
+                    this.saveSettings();
+                    modal.remove();
+                });
                 
                 // Close on backdrop click
                 modal.addEventListener('click', (e) => {
@@ -935,6 +961,23 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             }
 
             saveSettings() {
+                const frequency = document.getElementById('update-frequency').value;
+                const notifications = document.getElementById('enable-notifications').checked;
+                
+                // Save to localStorage
+                localStorage.setItem('updateFrequency', frequency);
+                localStorage.setItem('notificationsEnabled', notifications);
+                
+                // Update the metrics update interval
+                if (this.metricsInterval) {
+                    clearInterval(this.metricsInterval);
+                }
+                this.metricsInterval = setInterval(() => {
+                    if (!this.isTestRunning) {
+                        this.updateMetrics();
+                    }
+                }, parseInt(frequency));
+                
                 this.showNotification('Settings saved successfully!');
             }
 
@@ -946,7 +989,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 
                 this.isTestRunning = true;
                 const testBtn = document.querySelector('.btn.primary');
-                testBtn.textContent = '⏳ Testing...';
+                testBtn.textContent = 'Testing...';
                 testBtn.style.background = 'linear-gradient(45deg, #ff9500, #ffad33)';
                 
                 this.showNotification('Load test initiated...');
@@ -963,7 +1006,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 // End test after 10 seconds
                 setTimeout(() => {
                     this.isTestRunning = false;
-                    testBtn.textContent = '🚀 Run Test';
+                    testBtn.textContent = 'Run Test';
                     testBtn.style.background = 'linear-gradient(45deg, #007aff, #00d4ff)';
                     
                     this.showNotification('Load test completed! Peak: 149,000 TPS');
