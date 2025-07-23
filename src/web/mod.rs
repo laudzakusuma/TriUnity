@@ -37,6 +37,7 @@ pub struct DashboardData {
     pub network_status: String,
 }
 
+/// 🎯 Web server for TriUnity dashboard
 pub struct DashboardServer {
     metrics_sender: broadcast::Sender<LiveMetrics>,
     activity_sender: broadcast::Sender<ActivityEvent>,
@@ -46,6 +47,7 @@ pub struct DashboardServer {
 }
 
 impl DashboardServer {
+    /// 🆕 Create new dashboard server
     pub fn new(consensus_engine: Arc<Mutex<ConsensusEngine>>, storage: Arc<TriUnityStorage>) -> Self {
         let (metrics_sender, _) = broadcast::channel(100);
         let (activity_sender, _) = broadcast::channel(500);
@@ -59,16 +61,19 @@ impl DashboardServer {
         }
     }
 
+    /// 🚀 Start the web server
     pub async fn start(&self, port: u16) -> Result<(), Box<dyn std::error::Error>> {
         println!("🌐 Starting TriUnity Dashboard Server on port {}", port);
         
         let server = Arc::new(self.clone());
         
+        // Serve static dashboard
         let dashboard = warp::path::end()
             .map(|| {
-                warp::reply::html(include_str!("dashboard.html"))
+                warp::reply::html(include_str!("../../web/dashboard.html"))
             });
 
+        // API endpoint for current metrics
         let metrics_api = warp::path("api")
             .and(warp::path("metrics"))
             .and(warp::path::end())
@@ -416,6 +421,7 @@ async fn start_load_test(server: Arc<DashboardServer>) -> Result<impl Reply, war
             let _ = server_clone.activity_sender.send(activity);
         }
         
+        // Final test completion
         let completion_activity = ActivityEvent {
             id: 999,
             event_type: "success".to_string(),
@@ -430,12 +436,14 @@ async fn start_load_test(server: Arc<DashboardServer>) -> Result<impl Reply, war
     Ok(warp::reply::json(&serde_json::json!({"status": "Load test started"})))
 }
 
+/// 🔧 Helper to pass server to handlers
 fn with_server(
     server: Arc<DashboardServer>
 ) -> impl Filter<Extract = (Arc<DashboardServer>,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || server.clone())
 }
 
+/// ❌ Custom error for export failures
 #[derive(Debug)]
 struct ExportError;
 impl warp::reject::Reject for ExportError {}
