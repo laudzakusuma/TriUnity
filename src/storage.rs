@@ -7,22 +7,24 @@ pub struct TriUnityStorage {
 }
 
 impl TriUnityStorage {
-    pub async fn new(_data_dir: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(_data_dir: &str) -> Result<Self, String> {
         // Create data directory if it doesn't exist
-        tokio::fs::create_dir_all(_data_dir).await.ok();
+        if let Err(e) = tokio::fs::create_dir_all(_data_dir).await {
+            println!("⚠️ Could not create data directory: {}", e);
+        }
         
         Ok(Self {
             block_count: 847392, // Starting block number
         })
     }
     
-    pub async fn store_block(&self, block: &Block) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn store_block(&self, block: &Block) -> Result<(), String> {
         // Simulate storing block
         println!("📦 Stored block #{} with {} transactions", block.number, block.transactions.len());
         Ok(())
     }
     
-    pub async fn get_block_count(&self) -> Result<u64, Box<dyn std::error::Error>> {
+    pub async fn get_block_count(&self) -> Result<u64, String> {
         Ok(self.block_count)
     }
     

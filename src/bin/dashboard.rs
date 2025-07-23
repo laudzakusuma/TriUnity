@@ -8,7 +8,7 @@ use triunity::storage::TriUnityStorage;
 use triunity::web::DashboardServer;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn main() -> Result<(), String> {
     // Parse command line arguments
     let matches = Command::new("TriUnity Dashboard")
         .version("1.0.0")
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let port: u16 = matches.get_one::<String>("port")
         .unwrap()
         .parse()
-        .expect("Invalid port number");
+        .map_err(|e| format!("Invalid port number: {}", e))?;
     
     let data_dir = matches.get_one::<String>("data-dir").unwrap();
 
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     println!("🌐 Starting dashboard server...");
     let dashboard_server = DashboardServer::new(consensus_engine, storage);
     
-    // Start the server directly (no tokio::spawn needed)
+    // Start the server
     dashboard_server.start(port).await?;
     
     Ok(())
