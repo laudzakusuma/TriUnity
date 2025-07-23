@@ -1,7 +1,6 @@
 //! 🚀 TriUnity Dashboard Server Binary
 
 use std::sync::Arc;
-use tokio::signal;
 use clap::{Arg, Command};
 
 use triunity::consensus::ConsensusEngine;
@@ -9,7 +8,7 @@ use triunity::storage::TriUnityStorage;
 use triunity::web::DashboardServer;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Parse command line arguments
     let matches = Command::new("TriUnity Dashboard")
         .version("1.0.0")
@@ -57,17 +56,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("🌐 Starting dashboard server...");
     let dashboard_server = DashboardServer::new(consensus_engine, storage);
     
-    // Handle graceful shutdown
-    let server_handle = tokio::spawn(async move {
-        dashboard_server.start(port).await
-    });
-
-    // Wait for Ctrl+C
-    signal::ctrl_c().await?;
-    println!("\n🛑 Shutting down gracefully...");
+    // Start the server directly (no tokio::spawn needed)
+    dashboard_server.start(port).await?;
     
-    server_handle.abort();
-    
-    println!("✅ TriUnity Dashboard Server stopped");
     Ok(())
 }
