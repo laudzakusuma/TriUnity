@@ -13,7 +13,6 @@ pub struct MerkleTree {
 }
 
 impl MerkleTree {
-    /// 🌱 Create new merkle tree from data
     pub fn new(data: &[Vec<u8>]) -> Self {
         if data.is_empty() {
             return Self {
@@ -34,18 +33,13 @@ impl MerkleTree {
 
         Self { root, leaves }
     }
-
-    /// 🏗️ Calculate merkle root
     fn calculate_root(leaves: &[[u8; 32]]) -> [u8; 32] {
         if leaves.is_empty() {
             return [0; 32];
         }
-
         let mut hashes = leaves.to_vec();
-
         while hashes.len() > 1 {
             let mut next_level = Vec::new();
-            
             for chunk in hashes.chunks(2) {
                 let mut hasher = Sha3_256::new();
                 hasher.update(&chunk[0]);
@@ -63,17 +57,12 @@ impl MerkleTree {
         hashes[0]
     }
 
-    /// 🌿 Get merkle root
     pub fn root(&self) -> [u8; 32] {
         self.root
     }
-
-    /// 🍃 Get leaves
     pub fn leaves(&self) -> &[[u8; 32]] {
         &self.leaves
     }
-
-    /// 🔍 Generate merkle proof for leaf at index
     pub fn generate_proof(&self, index: usize) -> Option<MerkleProof> {
         if index >= self.leaves.len() {
             return None;
@@ -97,8 +86,6 @@ impl MerkleTree {
                     is_right: !is_right,
                 });
             }
-
-            // Calculate next level
             let mut next_level = Vec::new();
             for chunk in current_level.chunks(2) {
                 let mut hasher = Sha3_256::new();
@@ -121,8 +108,6 @@ impl MerkleTree {
             root: self.root,
         })
     }
-
-    /// ✅ Verify merkle proof
     pub fn verify_proof(proof: &MerkleProof) -> bool {
         let mut current_hash = proof.leaf_hash;
 
@@ -141,16 +126,12 @@ impl MerkleTree {
         current_hash == proof.root
     }
 }
-
-/// 🧾 Merkle proof structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MerkleProof {
     pub leaf_hash: [u8; 32],
     pub proof: Vec<MerkleProofElement>,
     pub root: [u8; 32],
 }
-
-/// 📋 Merkle proof element
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MerkleProofElement {
     pub hash: [u8; 32],
@@ -174,7 +155,7 @@ mod tests {
         assert_ne!(tree.root(), [0; 32]);
         assert_eq!(tree.leaves().len(), 4);
 
-        println!("🌳 Merkle tree creation working!");
+        println!("   Merkle tree creation working!");
         println!("   Root: {}", hex::encode(tree.root()));
         println!("   Leaves: {}", tree.leaves().len());
     }
@@ -185,7 +166,7 @@ mod tests {
         assert_eq!(tree.root(), [0; 32]);
         assert_eq!(tree.leaves().len(), 0);
 
-        println!("🌱 Empty merkle tree working!");
+        println!("Empty merkle tree working!");
     }
 
     #[test]
@@ -196,18 +177,14 @@ mod tests {
             b"tx3".to_vec(),
             b"tx4".to_vec(),
         ];
-
         let tree = MerkleTree::new(&data);
-        
-        // Generate proof for first transaction
         let proof = tree.generate_proof(0).unwrap();
         assert!(MerkleTree::verify_proof(&proof));
 
-        // Generate proof for last transaction
         let proof = tree.generate_proof(3).unwrap();
         assert!(MerkleTree::verify_proof(&proof));
 
-        println!("🔍 Merkle proof generation and verification working!");
+        println!("Merkle proof generation and verification working!");
     }
 
     #[test]
@@ -221,6 +198,6 @@ mod tests {
         let proof = tree.generate_proof(0).unwrap();
         assert!(MerkleTree::verify_proof(&proof));
 
-        println!("🍃 Single leaf merkle tree working!");
+        println!("Single leaf merkle tree working!");
     }
 }

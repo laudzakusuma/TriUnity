@@ -1,5 +1,3 @@
-//! 🤖 AI Consensus Engine
-
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
@@ -62,7 +60,6 @@ impl ConsensusEngine {
     }
     
     pub async fn process_transactions(&self, transactions: &[crate::blockchain::Transaction]) -> Result<(), String> {
-        // Simulate processing
         let mut stats = self.performance_stats.lock().unwrap();
         stats.total_transactions_processed += transactions.len() as u64;
         Ok(())

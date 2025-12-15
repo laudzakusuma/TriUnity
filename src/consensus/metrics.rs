@@ -1,12 +1,7 @@
- //! 📊 Network Performance Metrics
-//! 
-//! Real-time monitoring and analysis of network performance
-
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// 📈 Performance metrics collector
 #[derive(Debug, Clone)]
 pub struct MetricsCollector {
     tps_history: VecDeque<TpsReading>,
@@ -15,7 +10,6 @@ pub struct MetricsCollector {
     max_history_size: usize,
 }
 
-/// 📊 TPS (Transactions Per Second) reading
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TpsReading {
     pub timestamp: u64,
@@ -23,7 +17,6 @@ pub struct TpsReading {
     pub block_height: u64,
 }
 
-/// ⏱️ Network latency reading
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LatencyReading {
     pub timestamp: u64,
@@ -31,7 +24,6 @@ pub struct LatencyReading {
     pub node_count: usize,
 }
 
-/// 🚨 Security event
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SecurityEvent {
     pub timestamp: u64,
@@ -40,7 +32,6 @@ pub struct SecurityEvent {
     pub description: String,
 }
 
-/// 🔒 Types of security events
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SecurityEventType {
     SuspiciousActivity,
@@ -51,7 +42,6 @@ pub enum SecurityEventType {
     UnusualTraffic,
 }
 
-/// ⚠️ Security event severity levels
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SecuritySeverity {
     Low,
@@ -60,7 +50,6 @@ pub enum SecuritySeverity {
     Critical,
 }
 
-/// 📊 Aggregated performance statistics
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PerformanceStats {
     pub avg_tps: f64,
@@ -74,7 +63,6 @@ pub struct PerformanceStats {
 }
 
 impl MetricsCollector {
-    /// 📊 Create new metrics collector
     pub fn new(max_history_size: usize) -> Self {
         Self {
             tps_history: VecDeque::new(),
@@ -84,7 +72,6 @@ impl MetricsCollector {
         }
     }
 
-    /// 📈 Record TPS measurement
     pub fn record_tps(&mut self, tps: u64, block_height: u64) {
         let reading = TpsReading {
             timestamp: current_timestamp(),
@@ -94,13 +81,11 @@ impl MetricsCollector {
         
         self.tps_history.push_back(reading);
         
-        // Keep history size manageable
         while self.tps_history.len() > self.max_history_size {
             self.tps_history.pop_front();
         }
     }
 
-    /// ⏱️ Record latency measurement
     pub fn record_latency(&mut self, latency_ms: u64, node_count: usize) {
         let reading = LatencyReading {
             timestamp: current_timestamp(),
@@ -115,7 +100,6 @@ impl MetricsCollector {
         }
     }
 
-    /// 🚨 Record security event
     pub fn record_security_event(
         &mut self,
         event_type: SecurityEventType,
@@ -136,7 +120,6 @@ impl MetricsCollector {
         }
     }
 
-    /// 📊 Calculate performance statistics
     pub fn calculate_stats(&self) -> PerformanceStats {
         let avg_tps = if !self.tps_history.is_empty() {
             self.tps_history.iter().map(|r| r.tps as f64).sum::<f64>() / self.tps_history.len() as f64
@@ -154,13 +137,8 @@ impl MetricsCollector {
 
         let min_latency = self.latency_history.iter().map(|r| r.latency_ms).min().unwrap_or(0);
         let max_latency = self.latency_history.iter().map(|r| r.latency_ms).max().unwrap_or(0);
-
-        // Calculate security score based on recent events
         let security_score = self.calculate_security_score();
-        
-        // Calculate uptime (simplified)
         let uptime_percentage = if avg_tps > 0.0 { 99.9 } else { 0.0 };
-        
         let total_transactions = self.tps_history.iter().map(|r| r.tps).sum();
 
         PerformanceStats {
@@ -175,17 +153,16 @@ impl MetricsCollector {
         }
     }
 
-    /// 🔒 Calculate security score (0.0 to 1.0)
     fn calculate_security_score(&self) -> f64 {
         if self.security_events.is_empty() {
-            return 1.0; // Perfect score with no events
+            return 1.0;
         }
 
         let recent_events: Vec<_> = self.security_events
             .iter()
             .filter(|event| {
                 let now = current_timestamp();
-                now - event.timestamp < 3600 // Last hour
+                now - event.timestamp < 3600
             })
             .collect();
 
@@ -193,7 +170,6 @@ impl MetricsCollector {
             return 1.0;
         }
 
-        // Score based on severity of recent events
         let total_severity: f64 = recent_events
             .iter()
             .map(|event| match event.severity {
@@ -203,18 +179,15 @@ impl MetricsCollector {
                 SecuritySeverity::Critical => 1.0,
             })
             .sum();
-
-        // Convert to 0-1 score (higher is better)
         (1.0 - (total_severity / recent_events.len() as f64)).max(0.0)
     }
 
-    /// 📈 Get recent TPS trend
     pub fn get_tps_trend(&self) -> Option<f64> {
         if self.tps_history.len() < 2 {
             return None;
         }
 
-        let recent_count = (self.tps_history.len() / 4).max(2); // Last 25% of readings
+        let recent_count = (self.tps_history.len() / 4).max(2);
         let recent: Vec<_> = self.tps_history.iter().rev().take(recent_count).collect();
         
         if recent.len() < 2 {
@@ -224,10 +197,9 @@ impl MetricsCollector {
         let first_tps = recent.last().unwrap().tps as f64;
         let last_tps = recent.first().unwrap().tps as f64;
         
-        Some((last_tps - first_tps) / first_tps) // Percentage change
+        Some((last_tps - first_tps) / first_tps)
     }
 
-    /// 🚨 Get recent security events
     pub fn get_recent_security_events(&self, hours: u64) -> Vec<&SecurityEvent> {
         let cutoff = current_timestamp() - (hours * 3600);
         self.security_events
@@ -236,7 +208,6 @@ impl MetricsCollector {
             .collect()
     }
 
-    /// 📊 Get current metrics summary
     pub fn get_current_metrics(&self) -> Option<(u64, u64)> {
         let latest_tps = self.tps_history.back()?.tps;
         let latest_latency = self.latency_history.back()?.latency_ms;
@@ -244,7 +215,6 @@ impl MetricsCollector {
     }
 }
 
-/// 🕐 Get current Unix timestamp
 fn current_timestamp() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -254,7 +224,7 @@ fn current_timestamp() -> u64 {
 
 impl Default for MetricsCollector {
     fn default() -> Self {
-        Self::new(1000) // Keep last 1000 readings by default
+        Self::new(1000)
     }
 }
 
@@ -265,13 +235,9 @@ mod tests {
     #[test]
     fn test_metrics_collection() {
         let mut collector = MetricsCollector::new(100);
-        
-        // Record some TPS readings
         collector.record_tps(1000, 1);
         collector.record_tps(2000, 2);
         collector.record_tps(1500, 3);
-        
-        // Record latency
         collector.record_latency(50, 10);
         collector.record_latency(75, 12);
         
@@ -280,7 +246,7 @@ mod tests {
         assert_eq!(stats.peak_tps, 2000);
         assert_eq!(stats.avg_latency, 62.5);
         
-        println!("📊 Metrics collection working!");
+        println!("   Metrics collection working!");
         println!("   Average TPS: {:.1}", stats.avg_tps);
         println!("   Peak TPS: {}", stats.peak_tps);
         println!("   Average Latency: {:.1}ms", stats.avg_latency);
@@ -302,7 +268,7 @@ mod tests {
         let stats = collector.calculate_stats();
         assert!(stats.security_score < 1.0);
         
-        println!("🚨 Security event recording working!");
+        println!("   Security event recording working!");
         println!("   Security score: {:.2}", stats.security_score);
     }
 
@@ -310,15 +276,14 @@ mod tests {
     fn test_performance_trends() {
         let mut collector = MetricsCollector::new(100);
         
-        // Simulate increasing TPS
         for i in 1..=10 {
             collector.record_tps(i * 1000, i);
         }
         
         let trend = collector.get_tps_trend().unwrap();
-        assert!(trend > 0.0); // Should show positive trend
+        assert!(trend > 0.0);
         
-        println!("📈 TPS trend analysis working!");
+        println!("   TPS trend analysis working!");
         println!("   TPS trend: {:.2}% change", trend * 100.0);
     }
 }

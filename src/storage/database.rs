@@ -1,18 +1,12 @@
-//! 💾 Simple database layer using Sled
-//! 
-//! High-performance pure Rust database
-
 use sled::Db;
 use crate::core::storage::Block;
 
-/// 💾 Simple blockchain database
 #[derive(Debug, Clone)]
 pub struct BlockchainDB {
     db: Db,
 }
 
 impl BlockchainDB {
-    /// 🆕 Create new database
     pub fn new(path: &str) -> Result<Self, String> {
         let db = sled::open(path)
             .map_err(|e| e.to_string())?;
@@ -20,7 +14,6 @@ impl BlockchainDB {
         Ok(Self { db })
     }
 
-    /// 💾 Store block
     pub fn store_block(&self, block: &Block) -> Result<(), String> {
         let blocks = self.db.open_tree("blocks")
             .map_err(|e| e.to_string())?;
@@ -38,7 +31,6 @@ impl BlockchainDB {
         Ok(())
     }
 
-    /// 📖 Get block by height
     pub fn get_block(&self, height: u64) -> Result<Option<Block>, String> {
         let blocks = self.db.open_tree("blocks")
             .map_err(|e| e.to_string())?;
@@ -57,7 +49,6 @@ impl BlockchainDB {
         }
     }
 
-    /// 📏 Get latest block height
     pub fn get_latest_height(&self) -> Result<u64, String> {
         let blocks = self.db.open_tree("blocks")
             .map_err(|e| e.to_string())?;
@@ -94,26 +85,21 @@ mod tests {
     #[test]
     fn test_database_operations() {
         let temp_dir = std::env::temp_dir().join("triunity_test_db");
-        let _ = std::fs::remove_dir_all(&temp_dir); // Clean up
-        
+        let _ = std::fs::remove_dir_all(&temp_dir);
         let db = BlockchainDB::new(temp_dir.to_str().unwrap()).unwrap();
-        
-        // Store and retrieve block
         let block = create_test_block(1);
         db.store_block(&block).unwrap();
         
         let retrieved = db.get_block(1).unwrap().unwrap();
         assert_eq!(retrieved.header.height, 1);
         
-        // Check latest height
         let latest = db.get_latest_height().unwrap();
         assert_eq!(latest, 1);
         
-        println!("💾 Database operations working!");
+        println!("   Database operations working!");
         println!("   Stored and retrieved block height: {}", retrieved.header.height);
         println!("   Latest height: {}", latest);
         
-        // Clean up
         let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }

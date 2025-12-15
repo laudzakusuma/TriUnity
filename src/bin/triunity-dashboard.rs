@@ -8,10 +8,9 @@ use triunity::web::DashboardServer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Parse command line arguments
     let matches = Command::new("TriUnity Dashboard")
         .version("1.0.0")
-        .about("🚀 TriUnity Blockchain Dashboard Server")
+        .about("TriUnity Blockchain Dashboard Server")
         .arg(
             Arg::new("port")
                 .short('p')
@@ -44,29 +43,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_dir = matches.get_one::<String>("data-dir").unwrap();
     let auto_mine = matches.get_flag("auto-mine");
 
-    println!("🚀 Starting TriUnity Dashboard Server");
-    println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("   🌐 Port: {}", port);
-    println!("   💾 Data Directory: {}", data_dir);
-    println!("   ⛏️  Auto Mining: {}", if auto_mine { "Enabled" } else { "Disabled" });
-    println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-    // Initialize blockchain components
-    println!("🔧 Initializing blockchain components...");
+    println!("Starting TriUnity Dashboard Server");
+    println!("   Port: {}", port);
+    println!("   Data Directory: {}", data_dir);
+    println!("   Auto Mining: {}", if auto_mine { "Enabled" } else { "Disabled" });
+    println!("Initializing blockchain components...");
     
     let storage = Arc::new(TriUnityStorage::new(data_dir).await?);
     let consensus_engine = Arc::new(Mutex::new(ConsensusEngine::new()));
     
-    // Initialize the consensus engine with some validators
+
     {
         let mut consensus = consensus_engine.lock().unwrap();
         consensus.add_validator("validator_1".to_string(), 100);
         consensus.add_validator("validator_2".to_string(), 100);
         consensus.add_validator("validator_3".to_string(), 100);
-        println!("✅ Added 3 initial validators");
+        println!("Added 3 initial validators");
     }
 
-    // Start blockchain simulation if auto-mine is enabled
     if auto_mine {
         let storage_clone = storage.clone();
         let consensus_clone = consensus_engine.clone();
@@ -75,29 +69,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             start_blockchain_simulation(storage_clone, consensus_clone).await;
         });
         
-        println!("⛏️  Blockchain simulation started");
+        println!("Blockchain simulation started");
     }
 
-    // Create and start dashboard server
-    println!("🌐 Starting dashboard server...");
+    println!("Starting dashboard server...");
     let dashboard_server = DashboardServer::new(consensus_engine, storage);
-    
-    // Handle graceful shutdown
     let server_handle = tokio::spawn(async move {
         dashboard_server.start(port).await
     });
 
-    // Wait for Ctrl+C
     signal::ctrl_c().await?;
-    println!("\n🛑 Shutting down gracefully...");
+    println!("\n Shutting down gracefully...");
     
     server_handle.abort();
     
-    println!("✅ TriUnity Dashboard Server stopped");
+    println!("TriUnity Dashboard Server stopped");
     Ok(())
 }
 
-/// ⛏️ Simulate blockchain activity
 async fn start_blockchain_simulation(
     storage: Arc<TriUnityStorage>,
     consensus_engine: Arc<Mutex<ConsensusEngine>>
@@ -108,10 +97,7 @@ async fn start_blockchain_simulation(
     loop {
         interval.tick().await;
         
-        // Generate some transactions
         let transactions = generate_sample_transactions(10 + (block_number % 50));
-        
-        // Create a new block
         let parent_hash = if block_number == 1 {
             "0000000000000000000000000000000000000000000000000000000000000000".to_string()
         } else {
@@ -136,9 +122,9 @@ async fn start_blockchain_simulation(
         }
 
         if let Err(e) = storage.store_block(&block).await {
-            eprintln!("❌ Failed to store block {}: {}", block_number, e);
+            eprintln!("Failed to store block {}: {}", block_number, e);
         } else {
-            println!("✅ Block {} mined with {} transactions", block_number, block.transactions.len());
+            println!("Block {} mined with {} transactions", block_number, block.transactions.len());
         }
 
         block_number += 1;

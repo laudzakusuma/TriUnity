@@ -1,5 +1,3 @@
-//! 💾 Storage Engine
-
 use crate::blockchain::Block;
 
 pub struct TriUnityStorage {
@@ -8,19 +6,17 @@ pub struct TriUnityStorage {
 
 impl TriUnityStorage {
     pub async fn new(_data_dir: &str) -> Result<Self, String> {
-        // Create data directory if it doesn't exist
         if let Err(e) = tokio::fs::create_dir_all(_data_dir).await {
-            println!("⚠️ Could not create data directory: {}", e);
+            println!("Could not create data directory: {}", e);
         }
         
         Ok(Self {
-            block_count: 847392, // Starting block number
+            block_count: 847392,
         })
     }
     
     pub async fn store_block(&self, block: &Block) -> Result<(), String> {
-        // Simulate storing block
-        println!("📦 Stored block #{} with {} transactions", block.number, block.transactions.len());
+        println!("Stored block #{} with {} transactions", block.number, block.transactions.len());
         Ok(())
     }
     
@@ -29,7 +25,6 @@ impl TriUnityStorage {
     }
     
     pub async fn get_latest_block(&self) -> Option<Block> {
-        // Return a sample block
         Some(Block {
             number: self.block_count,
             timestamp: chrono::Utc::now().timestamp() as u64,

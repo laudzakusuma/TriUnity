@@ -1,5 +1,3 @@
-//! 🚀 TriUnity Dashboard Server Binary
-
 use std::sync::Arc;
 use clap::{Arg, Command};
 
@@ -38,25 +36,18 @@ async fn main() -> Result<(), String> {
     
     let data_dir = matches.get_one::<String>("data-dir").unwrap();
 
-    println!("🚀 Starting TriUnity Dashboard Server");
-    println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("   🌐 Port: {}", port);
-    println!("   💾 Data Directory: {}", data_dir);
-    println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-    // Initialize blockchain components
-    println!("🔧 Initializing blockchain components...");
+    println!("Starting TriUnity Dashboard Server");
+    println!("   Port: {}", port);
+    println!("   Data Directory: {}", data_dir);
+    println!("Initializing blockchain components...");
     
     let storage = Arc::new(TriUnityStorage::new(data_dir).await?);
     let consensus_engine = Arc::new(ConsensusEngine::new());
     
-    println!("✅ Blockchain components initialized");
-
-    // Create and start dashboard server
-    println!("🌐 Starting dashboard server...");
+    println!("Blockchain components initialized");
+    println!("Starting dashboard server...");
     let dashboard_server = DashboardServer::new(consensus_engine, storage);
     
-    // Start the server
     dashboard_server.start(port).await?;
     
     Ok(())

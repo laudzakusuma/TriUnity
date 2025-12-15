@@ -1,57 +1,43 @@
-//! ⚙️ Consensus Algorithm Implementations
-//! 
-//! Various consensus mechanisms used by TriUnity's adaptive system
-
 use serde::{Deserialize, Serialize};
 
-/// 🎯 Consensus algorithm types
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ConsensusAlgorithm {
-    /// ⚡ Delegated Proof of Stake (Fast Lane)
     DelegatedProofOfStake {
         validator_count: usize,
-        rotation_time: u64, // seconds
+        rotation_time: u64,
     },
-    /// 🛡️ Byzantine Fault Tolerance (Secure Lane)
     ByzantineFaultTolerance {
         required_confirmations: usize,
-        timeout: u64, // milliseconds
+        timeout: u64,
     },
-    /// 🎭 Proof of Authority (Emergency Mode)
     ProofOfAuthority {
-        authorities: Vec<Vec<u8>>, // public keys
+        authorities: Vec<Vec<u8>>,
     },
-    /// 🔄 Hybrid PoS/PoW (Balanced)
     HybridStakeWork {
         stake_weight: f64,
         work_weight: f64,
     },
 }
 
-// Rest of implementation...
 impl ConsensusAlgorithm {
-    /// ⚡ Fast consensus for high throughput
     pub fn fast_consensus(validator_count: usize) -> Self {
         Self::DelegatedProofOfStake {
-            validator_count: validator_count.min(21), // Cap for speed
-            rotation_time: 30, // 30 second rotation
+            validator_count: validator_count.min(21),
+            rotation_time: 30,
         }
     }
 
-    /// 🛡️ Secure consensus for critical operations
     pub fn secure_consensus(total_validators: usize) -> Self {
         Self::ByzantineFaultTolerance {
             required_confirmations: (total_validators * 2 / 3) + 1,
-            timeout: 10_000, // 10 second timeout
+            timeout: 10_000,
         }
     }
 
-    /// 🚨 Emergency consensus under attack
     pub fn emergency_consensus(authorities: Vec<Vec<u8>>) -> Self {
         Self::ProofOfAuthority { authorities }
     }
 
-    /// 🎯 Hybrid consensus for balance
     pub fn hybrid_consensus(stake_preference: f64) -> Self {
         Self::HybridStakeWork {
             stake_weight: stake_preference,
@@ -59,27 +45,24 @@ impl ConsensusAlgorithm {
         }
     }
 
-    /// ⏱️ Get expected finality time in milliseconds
     pub fn expected_finality_time(&self) -> u64 {
         match self {
-            Self::DelegatedProofOfStake { .. } => 100,    // Very fast
+            Self::DelegatedProofOfStake { .. } => 100,
             Self::ByzantineFaultTolerance { timeout, .. } => *timeout,
-            Self::ProofOfAuthority { .. } => 500,        // Fast but secure
-            Self::HybridStakeWork { .. } => 2000,        // Moderate
+            Self::ProofOfAuthority { .. } => 500,
+            Self::HybridStakeWork { .. } => 2000,
         }
     }
 
-    /// 🎯 Get expected throughput (TPS)
     pub fn expected_throughput(&self) -> u64 {
         match self {
-            Self::DelegatedProofOfStake { .. } => 100_000, // Maximum speed
-            Self::ByzantineFaultTolerance { .. } => 5_000,  // Secure but slower
-            Self::ProofOfAuthority { .. } => 10_000,       // Fast emergency mode
-            Self::HybridStakeWork { .. } => 25_000,        // Balanced
+            Self::DelegatedProofOfStake { .. } => 100_000,
+            Self::ByzantineFaultTolerance { .. } => 5_000,
+            Self::ProofOfAuthority { .. } => 10_000,
+            Self::HybridStakeWork { .. } => 25_000,
         }
     }
 
-    /// 🔒 Get security level (0.0 to 1.0)
     pub fn security_level(&self) -> f64 {
         match self {
             Self::DelegatedProofOfStake { validator_count, .. } => {
@@ -97,7 +80,6 @@ impl ConsensusAlgorithm {
         }
     }
 
-    /// 🌐 Get decentralization score (0.0 to 1.0)
     pub fn decentralization_score(&self) -> f64 {
         match self {
             Self::DelegatedProofOfStake { validator_count, .. } => {
@@ -127,7 +109,7 @@ mod tests {
         let emergency = ConsensusAlgorithm::emergency_consensus(vec![]);
         let hybrid = ConsensusAlgorithm::hybrid_consensus(0.7);
 
-        println!("⚙️ Consensus algorithms created!");
+        println!("   Consensus algorithms created!");
         println!("   Fast TPS: {}", fast.expected_throughput());
         println!("   Secure TPS: {}", secure.expected_throughput());
         println!("   Emergency TPS: {}", emergency.expected_throughput());

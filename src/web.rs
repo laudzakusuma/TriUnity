@@ -1,5 +1,3 @@
-//! 🌐 Web server integration for TriUnity dashboard
-
 use std::sync::Arc;
 use warp::Filter;
 use serde::Serialize;
@@ -21,7 +19,7 @@ pub struct LiveMetrics {
 
 pub struct DashboardServer {
     consensus_engine: Arc<ConsensusEngine>,
-    _storage: Arc<TriUnityStorage>, // Prefix with _ to silence warning
+    _storage: Arc<TriUnityStorage>,
 }
 
 impl DashboardServer {
@@ -33,15 +31,12 @@ impl DashboardServer {
     }
 
     pub async fn start(&self, port: u16) -> Result<(), String> {
-        println!("🌐 Starting TriUnity Dashboard Server on port {}", port);
-        
-        // Serve static dashboard
+        println!("Starting TriUnity Dashboard Server on port {}", port);
         let dashboard = warp::path::end()
             .map(|| {
                 warp::reply::html(APPLE_DASHBOARD_HTML)
             });
 
-        // API endpoint for current metrics
         let consensus_clone = self.consensus_engine.clone();
         let metrics_api = warp::path("api")
             .and(warp::path("metrics"))
@@ -66,9 +61,9 @@ impl DashboardServer {
             .or(metrics_api)
             .with(warp::cors().allow_any_origin());
 
-        println!("✅ Dashboard server running!");
-        println!("   📊 Dashboard: http://localhost:{}", port);
-        println!("   🔌 Metrics API: http://localhost:{}/api/metrics", port);
+        println!("Dashboard server running!");
+        println!("Dashboard: http://localhost:{}", port);
+        println!("Metrics API: http://localhost:{}/api/metrics", port);
 
         warp::serve(routes)
             .run(([127, 0, 0, 1], port))
@@ -545,7 +540,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             transform: scale(1);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -575,8 +569,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 font-size: 0.8rem;
             }
         }
-
-        /* Loading animation */
         .loading {
             opacity: 0.6;
             animation: pulse 1.5s ease-in-out infinite;
@@ -586,8 +578,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             0%, 100% { opacity: 0.6; }
             50% { opacity: 1; }
         }
-
-        /* Success feedback */
         .success-feedback {
             position: fixed;
             top: 20px;
@@ -615,9 +605,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         <div class="shape"></div>
         <div class="shape"></div>
     </div>
-
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="header-top">
                 <div class="logo">TriUnity</div>
@@ -637,8 +625,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 <button class="btn primary" onclick="runLoadTest()">Run Test</button>
             </div>
         </div>
-
-        <!-- Metrics Grid -->
         <div class="metrics-grid" id="metrics">
             <div class="metric-card">
                 <div class="metric-icon">⬢</div>
@@ -664,8 +650,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 <div class="metric-label">Active Validators</div>
             </div>
         </div>
-
-        <!-- Achievement Section -->
         <div class="achievement-section">
             <div class="achievement-content">
                 <div class="achievement-title">IMPOSSIBLE ACHIEVED</div>
@@ -683,7 +667,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             </div>
         </div>
     </div>
-
     <script>
         class TriUnityDashboard {
             constructor() {
@@ -708,10 +691,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             toggleTheme() {
                 const toggle = document.querySelector('.theme-toggle');
                 
-                // Create ripple effect
                 this.createRipple(toggle);
-                
-                // Toggle theme
                 this.isDarkMode = !this.isDarkMode;
                 
                 if (this.isDarkMode) {
@@ -720,10 +700,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                     document.documentElement.setAttribute('data-theme', 'light');
                 }
                 
-                // Save preference
                 localStorage.setItem('darkMode', this.isDarkMode);
-                
-                // Show feedback
                 this.showNotification(`Switched to ${this.isDarkMode ? 'dark' : 'light'} mode`);
             }
 
@@ -739,11 +716,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 ripple.style.top = (rect.top + rect.height / 2 - size / 2) + 'px';
                 
                 document.body.appendChild(ripple);
-                
-                // Animate ripple
                 setTimeout(() => ripple.classList.add('animate'), 10);
-                
-                // Remove ripple
                 setTimeout(() => {
                     if (ripple.parentNode) {
                         ripple.parentNode.removeChild(ripple);
@@ -759,14 +732,10 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
 
                     const response = await fetch('/api/metrics');
                     const data = await response.json();
-                    
-                    // Animate number changes
                     this.animateValue('tps', data.tps);
                     this.animateValue('block-time', data.block_time_ms);
                     this.animateValue('health', data.health_percentage.toFixed(1));
                     this.animateValue('validators', data.validator_count);
-
-                    // Remove loading state
                     setTimeout(() => {
                         metrics.forEach(metric => metric.classList.remove('loading'));
                     }, 500);
@@ -790,8 +759,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 const animate = (currentTime) => {
                     const elapsed = currentTime - startTime;
                     const progress = Math.min(elapsed / duration, 1);
-                    
-                    // Easing function
                     const easeProgress = 1 - Math.pow(1 - progress, 3);
                     const current = Math.floor(currentValue + (target - currentValue) * easeProgress);
                     
@@ -810,10 +777,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             }
 
             startMetricsUpdater() {
-                // Get saved frequency or default to 3000ms
                 const savedFrequency = localStorage.getItem('updateFrequency') || '3000';
-                
-                // Update every X seconds based on settings
                 this.metricsInterval = setInterval(() => {
                     if (!this.isTestRunning) {
                         this.updateMetrics();
@@ -832,11 +796,7 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 `;
                 
                 document.body.appendChild(notification);
-                
-                // Show notification
                 setTimeout(() => notification.classList.add('show'), 100);
-                
-                // Hide and remove notification
                 setTimeout(() => {
                     notification.classList.remove('show');
                     setTimeout(() => {
@@ -850,8 +810,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             async exportData() {
                 try {
                     this.showNotification('Preparing data export...');
-                    
-                    // Simulate export process
                     setTimeout(async () => {
                         const response = await fetch('/api/metrics');
                         const data = await response.json();
@@ -879,7 +837,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             }
 
             showSettings() {
-                // Create settings modal
                 const modal = document.createElement('div');
                 modal.className = 'settings-modal';
                 modal.style.cssText = `
@@ -932,14 +889,12 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 
                 document.body.appendChild(modal);
                 
-                // Load saved settings
                 const savedFrequency = localStorage.getItem('updateFrequency') || '3000';
                 const savedNotifications = localStorage.getItem('notificationsEnabled') !== 'false';
                 
                 document.getElementById('update-frequency').value = savedFrequency;
                 document.getElementById('enable-notifications').checked = savedNotifications;
                 
-                // Add event listeners for buttons
                 const cancelBtn = modal.querySelector('.cancel-btn');
                 const saveBtn = modal.querySelector('.save-btn');
                 
@@ -951,8 +906,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                     this.saveSettings();
                     modal.remove();
                 });
-                
-                // Close on backdrop click
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         modal.remove();
@@ -964,11 +917,8 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 const frequency = document.getElementById('update-frequency').value;
                 const notifications = document.getElementById('enable-notifications').checked;
                 
-                // Save to localStorage
                 localStorage.setItem('updateFrequency', frequency);
                 localStorage.setItem('notificationsEnabled', notifications);
-                
-                // Update the metrics update interval
                 if (this.metricsInterval) {
                     clearInterval(this.metricsInterval);
                 }
@@ -993,8 +943,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 testBtn.style.background = 'linear-gradient(45deg, #ff9500, #ffad33)';
                 
                 this.showNotification('Load test initiated...');
-                
-                // Simulate high performance during test
                 for (let i = 0; i < 10; i++) {
                     setTimeout(() => {
                         document.getElementById('tps').textContent = (140000 + i * 1000).toLocaleString();
@@ -1002,8 +950,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                         document.getElementById('health').textContent = Math.min(99.9, 99.7 + i * 0.02).toFixed(1);
                     }, i * 1000);
                 }
-                
-                // End test after 10 seconds
                 setTimeout(() => {
                     this.isTestRunning = false;
                     testBtn.textContent = 'Run Test';
@@ -1014,8 +960,6 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
                 }, 10000);
             }
         }
-
-        // Global functions for HTML onclick handlers
         function toggleTheme() {
             window.dashboard.toggleTheme();
         }
@@ -1032,12 +976,9 @@ const APPLE_DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
             window.dashboard.runLoadTest();
         }
 
-        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             window.dashboard = new TriUnityDashboard();
         });
-
-        // Add CSS animations
         const style = document.createElement('style');
         style.textContent = `
             @keyframes fadeIn {
