@@ -161,8 +161,8 @@ Examples:
 **QUANTUM-SAFE SECURITY**
 
 ```
-Traditional Crypto → Quantum Computer → BROKEN ❌
-Post-Quantum Crypto → Quantum Computer → SAFE ✅
+Traditional Crypto → Quantum Computer → BROKEN
+Post-Quantum Crypto → Quantum Computer → SAFE
 
 TriUnity uses 256-bit quantum-resistant algorithms
 ```
@@ -301,4 +301,4 @@ Quantum Security:   256-bit
 4. **Ensures Future Security** - Quantum-resistant cryptography
 5. **Provides Educational Value** - Complete learning resource
 
-**This project showcases how modern technologies (Rust, AI, advanced UI) can be combined to create innovative solutions to fundamental computer science problems, wrapped in a professional, usable interface that demonstrates both technical depth and design excellence.** 🚀💎
+**This project showcases how modern technologies (Rust, AI, advanced UI) can be combined to create innovative solutions to fundamental computer science problems, wrapped in a professional, usable interface that demonstrates both technical depth and design excellence.**
